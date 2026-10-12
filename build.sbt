@@ -1,4 +1,5 @@
-import sbtassembly.AssemblyKeys.{assemblyJarName, assemblyOption}
+import sbtassembly.AssemblyPlugin.autoImport._
+import com.earldouglas.xwp.JettyPlugin
 
 val liftVersion = SettingKey[String]("liftVersion", "Full version number of the Lift Web Framework")
 val liftEdition = SettingKey[String]("liftEdition", "Lift Edition (short version number to append to artifact name)")
@@ -22,13 +23,13 @@ val buildSettings = Seq (
   }.value,
   crossScalaVersions := Seq("2.9.1", "2.9.2", "2.10.4", "2.11.1", "2.11.12"),
   resolvers ++= Seq(
-    "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/public",
+    "CB Central Mirror" at "https://repo.cloudbees.com/content/groups/public",
     "Shiro Releases" at "https://repository.apache.org/content/repositories/releases/",
     "Shiro Snapshots" at "https://repository.apache.org/content/repositories/snapshots/",
     "sonatype.repo" at "https://oss.sonatype.org/content/repositories/public/"
   ),
-  assemblyJarName in assembly := (moduleName.value + "_" + scalaVersion.value.substring(0,4) + "-" + version.value + ".jar"),
-  assemblyOption  in assembly := (assemblyOption in assembly).value.copy(includeScala = false),
+  assembly / assemblyJarName := (moduleName.value + "_" + scalaVersion.value.substring(0,4) + "-" + version.value + ".jar"),
+  assembly / assemblyOption  ~= { _.withIncludeScala(false) },
   publishTo := version { (v: String) =>
     val nexus = "https://oss.sonatype.org/"
     if (v.trim.endsWith("SNAPSHOT")) {
@@ -43,7 +44,7 @@ val buildSettings = Seq (
     Credentials( file("/private/liftmodules/sonatype.credentials") )
   ),
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   pomIncludeRepository := { repo => false },
   pomExtra := (
     <url>https://github.com/timperrett/lift-shiro</url>
@@ -77,11 +78,11 @@ lazy val `lift-shiro-root` = (project in file("."))
   .aggregate(`lift-shiro`, `lift-shiro-example`)
   .settings(
     buildSettings,
-    // the root is just an aggregator so dont publish a JAR
-    publishArtifact in (Compile, packageBin) := false,
-    publishArtifact in (Test, packageBin) := false,
-    publishArtifact in (Compile, packageDoc) := false,
-    publishArtifact in (Compile, packageSrc) := false
+    // the root is just an aggregator so don't publish a JAR
+    Compile / packageBin / publishArtifact := false,
+    Test    / packageBin / publishArtifact := false,
+    Compile / packageDoc / publishArtifact := false,
+    Compile / packageSrc / publishArtifact := false
   )
 
 
@@ -91,7 +92,7 @@ lazy val `lift-shiro` = (project in file("library"))
     libraryDependencies ++= Seq(
       "org.apache.shiro" % "shiro-core" % "1.3.2",
       "org.apache.shiro" % "shiro-web"  % "1.3.2",
-      "commons-beanutils" % "commons-beanutils" % "1.8.3",
+      "commons-beanutils" % "commons-beanutils" % "1.11.0",
       liftVersion("net.liftweb" %% "lift-webkit" % _ % "provided").value
     )
   )
@@ -103,11 +104,11 @@ lazy val `lift-shiro-example` = (project in file("example"))
   .settings(
     buildSettings,
     libraryDependencies ++= Seq(
-      "net.liftmodules"   %% "fobo-jquery_3.0"  % "1.7"               % "compile",
-      "org.eclipse.jetty" % "jetty-webapp"      % "9.1.0.v20131115"   % "container",
-      "org.eclipse.jetty" % "jetty-plus"        % "9.1.0.v20131115"   % "container",
-      "javax.servlet"     % "javax.servlet-api" % "3.0.1"             % "provided",
-      "ch.qos.logback"    % "logback-classic"   % "0.9.26",
+      "net.liftmodules"   %% "fobo-jquery_3.0"  % "1.7"                             % "compile",
+      "org.eclipse.jetty" % "jetty-webapp"      % JettyPlugin.jettyRunner.revision  % "container",
+      "org.eclipse.jetty" % "jetty-plus"        % JettyPlugin.jettyRunner.revision  % "container",
+      "javax.servlet"     % "javax.servlet-api" % "3.1.0"                           % "provided",
+      "ch.qos.logback"    % "logback-classic"   % "1.2.13",
       liftVersion("net.liftweb" %% "lift-webkit" % _ % "compile").value
     )
   )

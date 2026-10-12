@@ -6,9 +6,17 @@ target/
 lib_managed/
 src_managed/
 project/boot/
+project/project/
+project/metals.sbt
+.metals
+.bloop
+.bsp
 .history
 .cache
 
 .idea
+
+.direnv
+.envrc
 
 # Created by .ignore support plugin (hsz.mobi)

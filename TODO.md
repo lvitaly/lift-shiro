@@ -1,5 +1,4 @@
-h2. TODO: 
+# TODO
 
 * Expodite hardcoded strings into a resource bundle
 * REST guards so you can protect resources that are not "pages"
-
